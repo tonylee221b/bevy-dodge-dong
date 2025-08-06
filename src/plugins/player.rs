@@ -11,8 +11,8 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-const PLAYER_SIZE: Vec2 = Vec2::new(120.0, 20.0);
-const PLAYER_SPEED: f32 = 1500.0;
+const PLAYER_SIZE: Vec2 = Vec2::new(16.0, 16.0);
+const PLAYER_SPEED: f32 = 1000.0;
 const PLAYER_COLOR: Color = Color::srgb(0.3, 0.3, 0.3);
 
 #[derive(Component)]
@@ -39,14 +39,21 @@ fn move_player(
     mut player_transform: Single<&mut Transform, With<Player>>,
     time: Res<Time>,
 ) {
-    let mut direction = 0.0;
+    let mut direction = Vec2::new(0.0, 0.0);
 
     if keyboard_input.pressed(KeyCode::ArrowLeft) || keyboard_input.pressed(KeyCode::KeyA) {
-        direction -= 1.0;
+        direction.x -= 1.0;
     }
     if keyboard_input.pressed(KeyCode::ArrowRight) || keyboard_input.pressed(KeyCode::KeyD) {
-        direction += 1.0;
+        direction.x += 1.0;
+    }
+    if keyboard_input.pressed(KeyCode::ArrowDown) || keyboard_input.pressed(KeyCode::KeyS) {
+        direction.y -= 1.0;
+    }
+    if keyboard_input.pressed(KeyCode::ArrowUp) || keyboard_input.pressed(KeyCode::KeyW) {
+        direction.y += 1.0;
     }
 
-    player_transform.translation.x += direction * PLAYER_SPEED * time.delta_secs();
+    player_transform.translation.x += direction.x * PLAYER_SPEED * time.delta_secs();
+    player_transform.translation.y += direction.y * PLAYER_SPEED * time.delta_secs();
 }
