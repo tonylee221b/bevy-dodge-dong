@@ -21,7 +21,9 @@ impl Default for FallAffected {
 
 impl FallAffected {
     pub fn set_fall_force(fall_force: f32) -> Self {
-        Self { fall_force }
+        Self {
+            fall_force: -fall_force,
+        }
     }
 }
 
@@ -43,10 +45,9 @@ impl Velocity {
     }
 }
 
-pub fn apply_fall_system(time: Res<Time>, mut query: Query<(&FallAffected, &mut Velocity)>) {
+pub fn apply_fall_system(mut query: Query<(&FallAffected, &mut Velocity)>) {
     for (gv_affected, mut velocity) in query.iter_mut() {
         velocity.y = gv_affected.fall_force;
-        println!("velocity: {:#?}", velocity.y);
     }
 }
 

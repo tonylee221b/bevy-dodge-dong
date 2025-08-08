@@ -12,7 +12,7 @@ impl Plugin for PlayerPlugin {
 }
 
 const PLAYER_SIZE: Vec2 = Vec2::new(40.0, 60.0);
-const PLAYER_SPEED: f32 = 1000.0;
+const PLAYER_SPEED: f32 = 750.0;
 const PLAYER_COLOR: Color = Color::srgb(0.3, 0.3, 0.3);
 
 #[derive(Component)]

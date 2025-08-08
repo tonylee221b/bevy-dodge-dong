@@ -4,15 +4,25 @@ mod game;
 mod plugins;
 
 use game::fall::FallPlugin;
+use game::timer;
 use plugins::{dong::DongPlugin, player::PlayerPlugin};
 
 const BG_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, FallPlugin))
+        .add_systems(Startup, (setup, timer::setup_spawn_timer).chain())
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    present_mode: bevy::window::PresentMode::Fifo,
+                    ..default()
+                }),
+                ..default()
+            }),
+            FallPlugin,
+        ))
         .add_plugins((PlayerPlugin, DongPlugin))
-        .add_systems(Startup, setup)
         .insert_resource(ClearColor(BG_COLOR))
         .run();
 }
