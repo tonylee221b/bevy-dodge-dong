@@ -1,5 +1,6 @@
-use crate::game::gravity::{GravityAffected, GravityVelocity};
+use crate::game::fall::{FallAffected, Velocity};
 use bevy::prelude::*;
+use rand::Rng;
 
 use super::collider::Collider;
 
@@ -18,16 +19,19 @@ const DONG_SIZE: Vec2 = Vec2::new(50.0, 50.0);
 struct Dong;
 
 fn spawn_dong(mut commands: Commands) {
+    let mut rng = rand::rng();
+    let random_x: f32 = rng.random_range(-200.0..=200.0);
+
     commands.spawn((
         Sprite::from_color(DONG_COLOR, Vec2::ONE),
         Transform {
-            translation: Vec3::new(0.0, 0.0, 0.0),
+            translation: Vec3::new(random_x, 300.0, 0.0),
             scale: DONG_SIZE.extend(1.0),
             ..default()
         },
         Dong,
         Collider,
-        GravityAffected::set_gravity(-100.0),
-        GravityVelocity::new(0.0, -30.0),
+        FallAffected::set_fall_force(-300.0),
+        Velocity::new(0.0, -1.0),
     ));
 }
