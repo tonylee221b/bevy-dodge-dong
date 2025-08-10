@@ -1,32 +1,21 @@
-use crate::game::fall::{FallAffected, Velocity};
-use crate::game::timer;
-use bevy::prelude::*;
+use crate::{
+    physics::{
+        collisions::components::*,
+        fallings::components::{FallAffected, FallVelocity},
+    },
+    prelude::*,
+    shared::timer::components::*,
+};
 use rand::Rng;
 
-use super::collider::{Collider, CollisionBehaviour, CollisionLayer, layers};
-
-pub struct DongPlugin;
-
-impl Plugin for DongPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Update, (spawn_dong, despawn_on_lifetime_end));
-    }
-}
+use super::components::{Dong, Lifetime};
 
 const DONG_COLOR: Color = Color::srgb(0.36, 0.25, 0.2);
 const DONG_SIZE: Vec2 = Vec2::new(50.0, 50.0);
 
-#[derive(Component)]
-struct Dong;
-
-#[derive(Component)]
-struct Lifetime {
-    timer: Timer,
-}
-
-fn spawn_dong(
+pub fn spawn_dong(
     time: Res<Time>,
-    mut spawn_timer: ResMut<timer::SpawnTimer>,
+    mut spawn_timer: ResMut<SpawnTimer>,
     mut commands: Commands,
     window: Single<&Window>,
 ) {
@@ -62,7 +51,7 @@ fn spawn_dong(
                 mask: layers::PLAYER,
             },
             FallAffected::set_fall_force(random_fall_speed),
-            Velocity::new(0.0, -1.0),
+            FallVelocity::new(0.0, -1.0),
             Lifetime {
                 timer: Timer::from_seconds(3.5, TimerMode::Once),
             },
@@ -70,7 +59,7 @@ fn spawn_dong(
     }
 }
 
-fn despawn_on_lifetime_end(
+pub fn despawn_on_lifetime_end(
     time: Res<Time>,
     mut commands: Commands,
     mut entities: Query<(Entity, &mut Lifetime), With<Dong>>,

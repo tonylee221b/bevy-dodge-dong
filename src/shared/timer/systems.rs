@@ -1,9 +1,4 @@
-use bevy::prelude::*;
-
-#[derive(Resource)]
-pub struct SpawnTimer {
-    pub timer: Timer,
-}
+use crate::{prelude::*, shared::timer::components::SpawnTimer};
 
 pub fn setup_spawn_timer(mut commands: Commands) {
     commands.insert_resource(SpawnTimer {
