@@ -5,7 +5,7 @@ mod plugins;
 
 use game::fall::FallPlugin;
 use game::timer;
-use plugins::{dong::DongPlugin, player::PlayerPlugin};
+use plugins::{collider::CollisionPlugin, dong::DongPlugin, player::PlayerPlugin};
 
 const BG_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
@@ -22,7 +22,7 @@ fn main() {
             }),
             FallPlugin,
         ))
-        .add_plugins((PlayerPlugin, DongPlugin))
+        .add_plugins((PlayerPlugin, DongPlugin, CollisionPlugin))
         .insert_resource(ClearColor(BG_COLOR))
         .run();
 }

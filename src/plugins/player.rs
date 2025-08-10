@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use super::collider::Collider;
+use super::collider::{Collider, CollisionBehaviour, CollisionLayer, layers};
 
 pub struct PlayerPlugin;
 
@@ -21,16 +21,30 @@ struct Player;
 #[derive(Component, Deref, DerefMut)]
 struct Velocity(Vec2);
 
-fn spawn_player(mut commands: Commands) {
+fn spawn_player(mut commands: Commands, window: Single<&Window>) {
+    let ground_pos = (-window.height() / 2.0) + (PLAYER_SIZE.y / 2.0) + 10.0;
+
     commands.spawn((
         Sprite::from_color(PLAYER_COLOR, Vec2::ONE),
         Transform {
-            translation: Vec3::new(0.0, -300.0, 0.0),
+            translation: Vec3::new(0.0, ground_pos, 0.0),
             scale: PLAYER_SIZE.extend(1.0),
             ..default()
         },
         Player,
-        Collider,
+        Collider {
+            size: Vec2 {
+                x: PLAYER_SIZE.x,
+                y: PLAYER_SIZE.y,
+            },
+        },
+        CollisionBehaviour {
+            entity_name: String::from("Player"),
+        },
+        CollisionLayer {
+            layer: layers::PLAYER,
+            mask: layers::DONG,
+        },
     ));
 }
 

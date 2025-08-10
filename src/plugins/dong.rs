@@ -3,7 +3,7 @@ use crate::game::timer;
 use bevy::prelude::*;
 use rand::Rng;
 
-use super::collider::Collider;
+use super::collider::{Collider, CollisionBehaviour, CollisionLayer, layers};
 
 pub struct DongPlugin;
 
@@ -38,7 +38,7 @@ fn spawn_dong(
         let window_top = window.height() / 2.0;
 
         let random_x: f32 = rng.random_range(window_left..window_right);
-        let random_fall_speed: f32 = rng.random_range(700.0..1500.0);
+        let random_fall_speed: f32 = rng.random_range(700.0..1700.0);
 
         commands.spawn((
             Sprite::from_color(DONG_COLOR, Vec2::ONE),
@@ -48,7 +48,19 @@ fn spawn_dong(
                 ..default()
             },
             Dong,
-            Collider,
+            Collider {
+                size: Vec2 {
+                    x: DONG_SIZE.x,
+                    y: DONG_SIZE.y,
+                },
+            },
+            CollisionBehaviour {
+                entity_name: String::from("Dong"),
+            },
+            CollisionLayer {
+                layer: layers::DONG,
+                mask: layers::PLAYER,
+            },
             FallAffected::set_fall_force(random_fall_speed),
             Velocity::new(0.0, -1.0),
             Lifetime {
