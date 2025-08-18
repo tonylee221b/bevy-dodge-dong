@@ -1,4 +1,6 @@
-use crate::{prelude::*, shared::timer::components::SpawnTimer};
+use super::components::SpawnTimer;
+
+use crate::prelude::*;
 
 pub fn setup_spawn_timer(mut commands: Commands) {
     commands.insert_resource(SpawnTimer {

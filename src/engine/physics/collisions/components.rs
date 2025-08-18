@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::prelude::*;
 
 #[derive(Component)]
@@ -5,9 +7,9 @@ pub struct Collider {
     pub size: Vec2,
 }
 
-#[derive(Component)]
-pub struct CollisionBehaviour {
-    pub entity_name: String,
+#[derive(Resource, Default)]
+pub struct CollisionIgnoreList {
+    pub ignored_pairs: HashSet<(Entity, Entity)>,
 }
 
 #[derive(Component)]

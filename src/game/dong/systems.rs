@@ -1,10 +1,13 @@
 use crate::{
-    physics::{
-        collisions::components::*,
-        fallings::components::{FallAffected, FallVelocity},
+    engine::{
+        physics::{
+            collisions::{components::*, events::CollisionEvent},
+            fallings::components::{FallAffected, FallVelocity},
+        },
+        timer::components::*,
     },
+    game::{player::components::Player, stats::events::ScoreUpEvent},
     prelude::*,
-    shared::timer::components::*,
 };
 use rand::Rng;
 
@@ -43,9 +46,6 @@ pub fn spawn_dong(
                     y: DONG_SIZE.y,
                 },
             },
-            CollisionBehaviour {
-                entity_name: String::from("Dong"),
-            },
             CollisionLayer {
                 layer: layers::DONG,
                 mask: layers::PLAYER,
@@ -56,6 +56,42 @@ pub fn spawn_dong(
                 timer: Timer::from_seconds(3.5, TimerMode::Once),
             },
         ));
+    }
+}
+
+pub fn emit_score_up_event(
+    window: Single<&Window>,
+    mut score_up_events: EventWriter<ScoreUpEvent>,
+    query: Query<(&Collider, &Transform), With<Dong>>,
+) {
+    let window_bottom = -window.height() / 2.0;
+
+    for q in query.iter() {
+        let (dong_collider, dong_transform) = q;
+        let bottom_line = window_bottom - dong_collider.size.y / 2.0;
+        if dong_transform.translation.y <= bottom_line {
+            score_up_events.write(ScoreUpEvent);
+        }
+    }
+}
+
+pub fn despawn_on_collision(
+    mut commands: Commands,
+    mut collision_events: EventReader<CollisionEvent>,
+    dong_query: Query<Entity, With<Dong>>,
+    player_query: Query<Entity, With<Player>>,
+) {
+    for collision_event in collision_events.read() {
+        let entity_a = collision_event.entity_a;
+        let entity_b = collision_event.entity_b;
+
+        if dong_query.contains(entity_a) && player_query.contains(entity_b) {
+            commands.entity(entity_a).despawn();
+        }
+
+        if dong_query.contains(entity_b) && player_query.contains(entity_a) {
+            commands.entity(entity_b).despawn();
+        }
     }
 }
 

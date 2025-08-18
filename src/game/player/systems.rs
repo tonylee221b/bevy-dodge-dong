@@ -1,6 +1,9 @@
-use crate::{physics::collisions::components::*, prelude::*};
+use crate::{
+    engine::physics::collisions::{components::*, events::CollisionEvent},
+    prelude::*,
+};
 
-use super::components::Player;
+use super::components::{Player, PlayerHealth};
 
 const PLAYER_SIZE: Vec2 = Vec2::new(40.0, 60.0);
 const PLAYER_SPEED: f32 = 750.0;
@@ -17,14 +20,12 @@ pub fn spawn_player(mut commands: Commands, window: Single<&Window>) {
             ..default()
         },
         Player,
+        PlayerHealth { cnt: 3 },
         Collider {
             size: Vec2 {
                 x: PLAYER_SIZE.x,
                 y: PLAYER_SIZE.y,
             },
-        },
-        CollisionBehaviour {
-            entity_name: String::from("Player"),
         },
         CollisionLayer {
             layer: layers::PLAYER,
@@ -48,4 +49,19 @@ pub fn move_player(
     }
 
     player_transform.translation.x += direction.x * PLAYER_SPEED * time.delta_secs();
+}
+
+pub fn take_damage(
+    mut commands: Commands,
+    mut collision_events: EventReader<CollisionEvent>,
+    player_entity: Single<(Entity, &mut PlayerHealth), With<Player>>,
+) {
+    let (entity, mut health) = player_entity.into_inner();
+
+    for _ in collision_events.read() {
+        health.cnt -= 1;
+        if health.cnt <= 0 {
+            commands.entity(entity).despawn();
+        }
+    }
 }

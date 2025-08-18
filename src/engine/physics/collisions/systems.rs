@@ -1,10 +1,11 @@
 use crate::prelude::*;
 
-use super::components::{Collider, CollisionBehaviour, CollisionLayer};
+use super::components::{Collider, CollisionIgnoreList, CollisionLayer};
 use super::events::CollisionEvent;
 
 pub fn collision_detection_event(
     mut collision_events: EventWriter<CollisionEvent>,
+    mut ignore_list: ResMut<CollisionIgnoreList>,
     query: Query<(Entity, &Transform, &Collider, &CollisionLayer)>,
 ) {
     let mut combinations = query.iter_combinations();
@@ -16,6 +17,10 @@ pub fn collision_detection_event(
         ],
     ) = combinations.fetch_next()
     {
+        if ignore_list.ignored_pairs.contains(&(entity_a, entity_b)) {
+            continue;
+        }
+
         let a_can_collide_with_b = (layer_a.mask & layer_b.layer) != 0;
         let b_can_collide_with_a = (layer_b.mask & layer_a.layer) != 0;
 
@@ -25,21 +30,8 @@ pub fn collision_detection_event(
 
         if check_collision(transform_a, collider_a, transform_b, collider_b) {
             collision_events.write(CollisionEvent { entity_a, entity_b });
-        }
-    }
-}
 
-pub fn collision_response_event(
-    mut collision_events: EventReader<CollisionEvent>,
-    query: Query<&CollisionBehaviour>,
-) {
-    for collision_event in collision_events.read() {
-        if let Ok(behaviour_a) = query.get(collision_event.entity_a) {
-            println!("충돌! entity_a: {:#?}", behaviour_a.entity_name);
-        }
-
-        if let Ok(behaviour_b) = query.get(collision_event.entity_b) {
-            println!("충돌! entity_b: {:#?}", behaviour_b.entity_name);
+            ignore_list.ignored_pairs.insert((entity_a, entity_b));
         }
     }
 }
