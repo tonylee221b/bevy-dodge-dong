@@ -1,11 +1,12 @@
 use bevy::prelude::*;
 use bevy_dodge_dong::GamePlugin;
+use bevy_egui::EguiPlugin;
 
 const BG_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
 fn main() {
     App::new()
-        .add_systems(Startup, setup)
+        .insert_resource(ClearColor(BG_COLOR))
         .add_plugins((DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 present_mode: bevy::window::PresentMode::Fifo,
@@ -13,8 +14,9 @@ fn main() {
             }),
             ..default()
         }),))
+        .add_plugins(EguiPlugin::default())
         .add_plugins(GamePlugin)
-        .insert_resource(ClearColor(BG_COLOR))
+        .add_systems(Startup, setup)
         .run();
 }
 
