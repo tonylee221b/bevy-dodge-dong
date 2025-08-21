@@ -1,9 +1,11 @@
 use crate::prelude::*;
 
+pub struct PlayerPlugin;
+
 #[derive(Component)]
 pub struct Player;
 
-#[derive(Component)]
+#[derive(Resource)]
 pub struct PlayerHealth {
-    pub cnt: i32,
+    pub cnt: u8,
 }

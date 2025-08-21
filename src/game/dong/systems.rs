@@ -6,17 +6,30 @@ use crate::{
         },
         timer::components::*,
     },
-    game::{player::components::Player, stats::events::ScoreUpEvent},
+    game::{
+        global::components::{GameEntity, GameState, Score},
+        player::components::Player,
+    },
     prelude::*,
 };
 use rand::Rng;
 
-use super::components::{Dong, Lifetime};
+use super::components::{Dong, DongPlugin};
 
 const DONG_COLOR: Color = Color::srgb(0.36, 0.25, 0.2);
 const DONG_SIZE: Vec2 = Vec2::new(50.0, 50.0);
 
-pub fn spawn_dong(
+impl Plugin for DongPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            Update,
+            (spawn_dong, despawn_on_collision, dong_ground_check)
+                .run_if(in_state(GameState::InGame)),
+        );
+    }
+}
+
+fn spawn_dong(
     time: Res<Time>,
     mut spawn_timer: ResMut<SpawnTimer>,
     mut commands: Commands,
@@ -52,30 +65,32 @@ pub fn spawn_dong(
             },
             FallAffected::set_fall_force(random_fall_speed),
             FallVelocity::new(0.0, -1.0),
-            Lifetime {
-                timer: Timer::from_seconds(3.5, TimerMode::Once),
-            },
+            GameEntity,
         ));
     }
 }
 
-pub fn emit_score_up_event(
+fn dong_ground_check(
+    mut commands: Commands,
+    query: Query<(Entity, &Transform, &Collider), With<Dong>>,
     window: Single<&Window>,
-    mut score_up_events: EventWriter<ScoreUpEvent>,
-    query: Query<(&Collider, &Transform), With<Dong>>,
+    mut score: Option<ResMut<Score>>,
 ) {
     let window_bottom = -window.height() / 2.0;
 
-    for q in query.iter() {
-        let (dong_collider, dong_transform) = q;
-        let bottom_line = window_bottom - dong_collider.size.y / 2.0;
-        if dong_transform.translation.y <= bottom_line {
-            score_up_events.write(ScoreUpEvent);
+    for (entity, transform, collider) in query.iter() {
+        let bottom_line = window_bottom - (collider.size.y / 2.0);
+        if transform.translation.y <= bottom_line {
+            commands.entity(entity).despawn();
+
+            if let Some(ref mut score) = score {
+                score.value += 1;
+            }
         }
     }
 }
 
-pub fn despawn_on_collision(
+fn despawn_on_collision(
     mut commands: Commands,
     mut collision_events: EventReader<CollisionEvent>,
     dong_query: Query<Entity, With<Dong>>,
@@ -91,18 +106,6 @@ pub fn despawn_on_collision(
 
         if dong_query.contains(entity_b) && player_query.contains(entity_a) {
             commands.entity(entity_b).despawn();
-        }
-    }
-}
-
-pub fn despawn_on_lifetime_end(
-    time: Res<Time>,
-    mut commands: Commands,
-    mut entities: Query<(Entity, &mut Lifetime), With<Dong>>,
-) {
-    for (entity, mut lifetime) in entities.iter_mut() {
-        if lifetime.timer.tick(time.delta()).just_finished() {
-            commands.entity(entity).despawn();
         }
     }
 }

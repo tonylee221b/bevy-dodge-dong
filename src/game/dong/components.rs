@@ -1,9 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Component)]
-pub struct Dong;
+pub struct DongPlugin;
 
 #[derive(Component)]
-pub struct Lifetime {
-    pub timer: Timer,
-}
+pub struct Dong;
