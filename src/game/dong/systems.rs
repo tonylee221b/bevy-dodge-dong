@@ -16,8 +16,7 @@ use rand::Rng;
 
 use super::components::{Dong, DongPlugin};
 
-const DONG_COLOR: Color = Color::srgb(0.36, 0.25, 0.2);
-const DONG_SIZE: Vec2 = Vec2::new(50.0, 50.0);
+const DONG_SIZE: Vec2 = Vec2::new(30.0, 30.0);
 
 impl Plugin for DongPlugin {
     fn build(&self, app: &mut App) {
@@ -34,6 +33,7 @@ fn spawn_dong(
     mut spawn_timer: ResMut<SpawnTimer>,
     mut commands: Commands,
     window: Single<&Window>,
+    asset_server: Res<AssetServer>,
 ) {
     if spawn_timer.timer.tick(time.delta()).just_finished() {
         let mut rng = rand::rng();
@@ -43,13 +43,16 @@ fn spawn_dong(
         let window_top = window.height() / 2.0;
 
         let random_x: f32 = rng.random_range(window_left..window_right);
-        let random_fall_speed: f32 = rng.random_range(700.0..1700.0);
+        let random_fall_speed: f32 = rng.random_range(700.0..2500.0);
 
         commands.spawn((
-            Sprite::from_color(DONG_COLOR, Vec2::ONE),
+            Sprite {
+                image: asset_server.load("poop2.png"),
+                custom_size: Some(DONG_SIZE),
+                ..default()
+            },
             Transform {
                 translation: Vec3::new(random_x, window_top + DONG_SIZE.y / 2.0, 0.0),
-                scale: DONG_SIZE.extend(1.0),
                 ..default()
             },
             Dong,
